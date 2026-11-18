@@ -41,8 +41,8 @@ inline const QString APP_VERSION = QStringLiteral(JIETUBA_APP_VERSION);
 // A placeholder tray icon so the tray stays visible and clickable when the icon resource
 // is missing. Uses no resource or theme manager: reaching it means resources already failed.
 QIcon create_fallback_app_icon();
-// The application icon from SVG, falling back to the placeholder; always a valid icon,
-// since the tray is the only resident entry point.
+// The application icon: the user's custom icon when set, else the bundled tray SVG, else the
+// drawn placeholder; always a valid icon, since the tray is the only resident entry point.
 QIcon create_app_icon();
 
 class MainApp : public QObject, public UpdateHost {

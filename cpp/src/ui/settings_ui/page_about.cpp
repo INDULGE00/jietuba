@@ -1,3 +1,4 @@
+#include "core/app_identity.h"
 #include "core/constants.h"
 #include "core/logger.h"
 #include "core/update_checker.h"
@@ -8,9 +9,12 @@
 #include "main_app.h"
 #include "ui/dialogs.h"
 #include "ui/fluent_lite/buttons.h"
+#include "ui/fluent_lite/inputs.h"
 #include "ui/settings_ui/components.h"
 #include "ui/settings_ui/dialog.h"
 #include "ui/settings_ui/pages.h"
+#include <QLineEdit>
+#include <QHBoxLayout>
 
 namespace jietuba {
 QWidget *create_about_page(SettingsDialog *dialog) {
@@ -23,13 +27,43 @@ QWidget *create_about_page(SettingsDialog *dialog) {
     layout->setContentsMargins(0, dialog_scaled(20), dialog_scaled(10), dialog_scaled(20));
     layout->setSpacing(dialog_scaled(16));
 
+    // ════ Customization: app name and icon ════
+    auto *brand_group = new SettingsCardGroup(dialog->tr_text("Customization"), view);
+    auto *name_card = new SettingCard(FluentIcon::Font, dialog->tr_text("Application Name"), dialog->tr_text("Shown in the tray, title bars and settings."), brand_group);
+    auto *name_edit = new LineEdit(name_card);
+    name_edit->setPlaceholderText(DEFAULT_APP_NAME);
+    name_edit->setMaxLength(64);
+    name_edit->setText(custom_app_name());
+    name_edit->setObjectName("customAppNameEdit");
+    dialog->set_attr("custom_app_name", name_edit);
+    name_card->addControl(name_edit);
+    brand_group->addSettingCard(name_card);
+
+    auto *icon_card = new SettingCard(FluentIcon::Camera, dialog->tr_text("Application Icon"), custom_icon_requirements_text(), brand_group);
+    auto *icon_path_lbl = new QLabel(custom_icon_path(), icon_card);
+    icon_path_lbl->setObjectName("customIconPathLabel");
+    icon_path_lbl->setWordWrap(true);
+    apply_theme_text_style(icon_path_lbl, 13, false, {}, true);
+    dialog->set_attr("custom_icon_path", icon_path_lbl);
+    icon_card->addControl(icon_path_lbl);
+    auto *choose_btn = new PushButton(dialog->tr_text("Choose Icon..."), icon_card);
+    choose_btn->setObjectName("chooseCustomIconButton");
+    QObject::connect(choose_btn, &QPushButton::clicked, dialog, &SettingsDialog::choose_custom_icon);
+    icon_card->addControl(choose_btn, Qt::AlignRight);
+    auto *clear_btn = new PushButton(dialog->tr_text("Reset"), icon_card);
+    clear_btn->setObjectName("clearCustomIconButton");
+    QObject::connect(clear_btn, &QPushButton::clicked, dialog, &SettingsDialog::clear_custom_icon);
+    icon_card->addControl(clear_btn, Qt::AlignRight);
+    brand_group->addSettingCard(icon_card);
+    layout->addWidget(brand_group);
+
     auto *group = new SettingsCardGroup(dialog->tr_text("About"), view);
-    auto *name_card = new SettingCard(FluentIcon::Application, dialog->tr_text("Version"), APP_VERSION, group);
+    auto *version_card = new SettingCard(FluentIcon::Application, dialog->tr_text("Version"), APP_VERSION, group);
     // Builds without the bundled updater helper (JIETUBA_UPDATES off) offer no update check.
     if (updater_bundled()) {
-        auto *check_update_btn = new PushButton(dialog->tr_text("Check for Updates"), name_card);
+        auto *check_update_btn = new PushButton(dialog->tr_text("Check for Updates"), version_card);
         check_update_btn->setObjectName("checkUpdateButton");
-        name_card->addControl(check_update_btn);
+        version_card->addControl(check_update_btn);
         auto *release_checker = new GitHubReleaseChecker(dialog);
         auto finish_check = [dialog, check_update_btn] {
             check_update_btn->setEnabled(true);
@@ -74,7 +108,7 @@ QWidget *create_about_page(SettingsDialog *dialog) {
             check_update_btn->setText(dialog->tr_text("Checking..."));
         });
     }
-    group->addSettingCard(name_card);
+    group->addSettingCard(version_card);
     group->addSettingCard(new SettingCard(FluentIcon::People, dialog->tr_text("Developer"), "JYAARU", group));
 
     auto *license_card = new SettingCard(FluentIcon::Document, dialog->tr_text("Licenses"), "MIT", group);

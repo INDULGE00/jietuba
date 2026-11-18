@@ -339,3 +339,7 @@ SETTING(preload_ocr, "app/preload_ocr", bool, true, Import, Gen, Gen)
 SETTING(preload_settings, "app/preload_settings", bool, true, Import, Gen, Gen)
 SETTING(preload_clipboard, "app/preload_clipboard", bool, true, Import, Gen, Gen)
 SETTING(screenshot_info_hide_on_drag, "app/screenshot_info_hide_on_drag", bool, false, Import, Gen, Gen)
+// User branding: the name shown in the tray and title bars, and an icon copied into the data
+// folder. The name travels with the settings file; the icon path is local to this computer.
+SETTING(custom_app_name, "app/custom_app_name", QString, "", Import, Gen, Trim)
+SETTING(custom_icon_path, "app/custom_icon_path", QString, "", Local, Gen, Gen)

@@ -1,4 +1,5 @@
 #include "ui/settings_ui/dialog.h"
+#include "core/app_identity.h"
 #include "core/file_names.h"
 #include "clipboard/ui/theme/themes.h"
 #include "core/i18n.h"
@@ -271,8 +272,7 @@ void SettingsDialog::setup_titlebar() {
     title_bar->hBoxLayout->setContentsMargins(0, 0, 0, 0);
     if (title_bar->maxBtn) title_bar->maxBtn->hide();
     title_bar->setDoubleClickEnabled(false);
-    const QString icon_path = ResourceManager::get_resource_path(QString::fromUtf8("svg/托盘.svg"));
-    if (QFileInfo::exists(icon_path)) setWindowIcon(QIcon(icon_path));
+    setWindowIcon(app_icon());
 }
 
 // ── UI ──
@@ -303,10 +303,12 @@ void SettingsDialog::setup_ui() {
     auto *logo_icon_lbl = new QLabel;
     logo_icon_lbl->setFixedSize(dialog_scaled(26), dialog_scaled(26));
     logo_icon_lbl->setAlignment(Qt::AlignCenter);
-    const QString icon_path = ResourceManager::get_resource_path(QString::fromUtf8("svg/托盘.svg"));
-    if (QFileInfo::exists(icon_path)) logo_icon_lbl->setPixmap(QIcon(icon_path).pixmap(dialog_scaled(26), dialog_scaled(26)));
+    brand_icon_label_ = logo_icon_lbl;
+    const int brand_icon_size = dialog_scaled(26);
+    logo_icon_lbl->setPixmap(app_icon().pixmap(brand_icon_size, brand_icon_size));
     logo_layout->addWidget(logo_icon_lbl, 0, Qt::AlignVCenter);
-    auto *app_name_lbl = new BodyLabel(tr_text("jietuba"));
+    auto *app_name_lbl = new BodyLabel(display_app_name());
+    brand_name_label_ = app_name_lbl;
     apply_theme_text_style(app_name_lbl, 14, true);
     logo_layout->addWidget(app_name_lbl, 1, Qt::AlignVCenter);
     left_v->addWidget(logo_area);
@@ -482,6 +484,34 @@ void SettingsDialog::open_log_dir() {
     QDesktopServices::openUrl(QUrl::fromLocalFile(path));
 }
 
+void SettingsDialog::choose_custom_icon() {
+    const auto [source, _] = get_open_file_name(this, tr_text("Choose Custom Icon"), QString(),
+                                                 QStringLiteral("Icon files (*.ico *.png *.svg)"));
+    if (source.isEmpty()) return;
+    QString error;
+    const QString installed = install_custom_icon(source, &error);
+    if (installed.isEmpty()) {
+        show_warning_dialog(this, tr_text("Invalid Icon"), error);
+        return;
+    }
+    const QString previous = config_manager->get_custom_icon_path();
+    if (!previous.isEmpty() && previous != installed) remove_custom_icon(previous);
+    config_manager->set_custom_icon_path(installed);
+    if (auto *path_lbl = attr_widget("custom_icon_path")) set_text(path_lbl, installed);
+    refresh_branding();
+    // The choice is a committed setting, not a pending text edit: save and apply it now.
+    apply_settings();
+}
+
+void SettingsDialog::clear_custom_icon() {
+    const QString previous = config_manager->get_custom_icon_path();
+    if (!previous.isEmpty()) remove_custom_icon(previous);
+    config_manager->set_custom_icon_path(QString());
+    if (auto *path_lbl = attr_widget("custom_icon_path")) set_text(path_lbl, QString());
+    refresh_branding();
+    apply_settings();
+}
+
 // ── Title row ──
 
 QLayout *SettingsDialog::create_title_row() {
@@ -571,11 +601,17 @@ void SettingsDialog::reset_current_page() {
     case 5: reset_log_page(); break;
     case 6: reset_misc_page(); break;
     case 7: reset_long_screenshot_page(); break;
+    case 8: reset_about_page(); break;
     case 10: reset_mouse_page(); break;
     case 11: reset_pin_page(); break;
     case 12: reset_screen_annotation_page(); break;
     default: break;
     }
+}
+
+void SettingsDialog::reset_about_page() {
+    if (auto *edit = attr<QLineEdit>("custom_app_name")) set_text(edit, QString());
+    if (auto *lbl = attr_widget("custom_icon_path")) set_text(lbl, QString());
 }
 
 void SettingsDialog::reset_pin_page() {
@@ -924,6 +960,15 @@ void SettingsDialog::save_changes(QSet<QString> changed) {
         config_manager->set_clipboard_file_reference_enabled(checked_of(toggle));
     if (auto *toggle = attr_widget("watermark_auto_toggle"); toggle && has("watermark_auto_toggle")) config_manager->set_screenshot_watermark_auto(checked_of(toggle));
     if (auto *label = attr_widget("save_path_lbl"); label && has("save_path_lbl")) config_manager->set_screenshot_save_path(text_of(label));
+    if (auto *edit = attr<QLineEdit>("custom_app_name"); edit && has("custom_app_name"))
+        config_manager->set_custom_app_name(text_of(edit).trimmed());
+    if (auto *lbl = attr_widget("custom_icon_path"); lbl && has("custom_icon_path")) {
+        const QString wanted = text_of(lbl).trimmed();
+        const QString previous = config_manager->get_custom_icon_path();
+        if (wanted.isEmpty()) remove_custom_icon(previous);
+        else if (validate_custom_icon(wanted).isEmpty() && wanted != previous) remove_custom_icon(previous);
+        config_manager->set_custom_icon_path(wanted);
+    }
     if (auto *combo = attr<QComboBox>("screenshot_format_combo"); combo && has("screenshot_format_combo")) config_manager->set_screenshot_format(combo->currentData().toString());
     if (auto *combo = attr<QComboBox>("save_dialog_style_combo"); combo && has("save_dialog_style_combo")) config_manager->set_save_dialog_style(combo->currentData().toString());
 
@@ -1229,7 +1274,7 @@ QVariantMap SettingsDialog::snapshot_settings() const {
     for (const auto &[key, control] : behavior_controls)
         if (control) snap[key] = behavior_value(control);
     // Text.
-    for (const auto &name : GLOBAL_HOTKEY_EDIT_ATTRS + QStringList{"save_path_lbl", "path_lbl"})
+    for (const auto &name : GLOBAL_HOTKEY_EDIT_ATTRS + QStringList{"save_path_lbl", "path_lbl", "custom_app_name", "custom_icon_path"})
         if (auto *widget = attr_widget(name)) snap[name] = text_of(widget);
     // Translation credentials by declaration, so every provider's edits count as unsaved.
     if (provider_field_widgets)
@@ -1318,12 +1363,12 @@ void SettingsDialog::open_view(const ViewState &state) {
 }
 
 void SettingsDialog::apply_taskbar_icon() {
-    const QString icon_path = ResourceManager::get_resource_path(QString::fromUtf8("svg/托盘.svg"));
-    if (!QFileInfo::exists(icon_path)) return;
+    const QIcon icon = app_icon();
+    if (icon.isNull()) return;
     QPixmap pix(32, 32);
     pix.fill(Qt::transparent);
     QPainter painter(&pix);
-    QIcon(icon_path).paint(&painter, 0, 0, 32, 32);
+    icon.paint(&painter, 0, 0, 32, 32);
     painter.end();
     // The previous icon is released once the window holds the new one.
     static HICON current = nullptr;
@@ -1337,6 +1382,17 @@ void SettingsDialog::apply_taskbar_icon() {
 }
 
 // ── Refresh ──
+
+void SettingsDialog::refresh_branding() {
+    const QIcon icon = app_icon();
+    setWindowIcon(icon);
+    if (brand_icon_label_) {
+        const int brand_icon_size = dialog_scaled(26);
+        brand_icon_label_->setPixmap(icon.pixmap(brand_icon_size, brand_icon_size));
+    }
+    if (brand_name_label_) brand_name_label_->setText(display_app_name());
+    if (isVisible()) apply_taskbar_icon();
+}
 
 void SettingsDialog::refresh_behavior_controls(bool defaults, const QString &prefix, const std::optional<std::set<QString>> &keys) {
     for (const auto &[key, control] : behavior_controls) {
@@ -1454,6 +1510,9 @@ void SettingsDialog::refresh_settings() {
         combo->setCurrentIndex(combo->findData(config_manager->get_clipboard_window_opacity()));
     select_data(attr<QComboBox>("_color_picker_style_combo"), config_manager->get_color_picker_style());
 
+    refresh_branding();
+    if (auto *name_edit = attr<QLineEdit>("custom_app_name")) set_text(name_edit, custom_app_name());
+    if (auto *path_lbl = attr_widget("custom_icon_path")) set_text(path_lbl, custom_icon_path());
     refresh_appearance_controls(&SettingsDialog::runtime_appearance);
 }
 

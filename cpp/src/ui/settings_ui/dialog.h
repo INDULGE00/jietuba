@@ -69,6 +69,8 @@ public:
     void accept() override;
     QString get_hotkey() const;
     void update_hotkey(const QString &new_hotkey);
+    // Re-reads the user's custom app name and icon after they are saved.
+    void refresh_branding();
     // Rereads every setting from the configuration into the controls.
     void refresh_settings();
     // Import goes through every page's controls, so all pages are built first.
@@ -166,6 +168,9 @@ public:
     void open_save_dir();
     void change_log_dir();
     void open_log_dir();
+    // About: pick a custom icon, validate it, copy it to the data folder and show the stored path.
+    void choose_custom_icon();
+    void clear_custom_icon();
     void open_welcome_wizard() { emit wizard_requested(); }
     // The pin page's shortcut entries: switch to the keyboard or mouse page and select the pin tab.
     void show_pin_shortcuts(bool mouse = false);
@@ -230,6 +235,7 @@ private:
     void reset_hotkey_page();
     void reset_long_screenshot_page();
     void reset_appearance_page();
+    void reset_about_page();
     void reset_quick_actions_page();
     void reset_screenshot_settings_page();
     void reset_log_page();
@@ -272,5 +278,7 @@ private:
     QWidget *right_area_ = nullptr;
     QLabel *content_title_ = nullptr;
     QPushButton *page_reset_btn_ = nullptr;
+    QLabel *brand_icon_label_ = nullptr;
+    QLabel *brand_name_label_ = nullptr;
 };
 }

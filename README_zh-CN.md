@@ -115,6 +115,16 @@
 
 也可以手动放进 exe 旁的 `models/` 目录：`PP-OCRv6_det_small.onnx`、`PP-OCRv6_rec_small.onnx`（仓库的 [models/](models/) 里就有）和 ONNX Runtime 1.24 及以上的纯 CPU 版 `onnxruntime.dll`。
 
+## 自定义软件名称与图标
+
+在「设置 → 关于 → 个性化」中可以修改托盘、标题栏和设置窗口显示的软件名称，也可以更换软件图标。图标要求：
+
+- 文件类型：`ICO`、`PNG`、`SVG`
+- 尺寸：正方形；PNG/ICO 边长 16–1024 像素（SVG 仅要求正方形）；推荐 64×64 或 256×256 的 PNG
+- 大小：不超过 4 MB
+
+选中的图标会被复制到应用数据目录，原文件可随时删除。点击「重置」恢复默认图标与名称。
+
 ## 代码签名政策
 
 Windows 发布包中的 `jietuba_pp.exe` 和 `jietuba_lite.exe` 均由 GitHub Actions 从本仓库 [cpp/](cpp/) 的 C++ 源码构建。发布流程支持通过 SignPath 进行代码签名；是否签名取决于该次构建配置，请以具体发布包的 EXE 数字签名和发布说明为准。

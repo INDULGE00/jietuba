@@ -8,6 +8,7 @@
 #include "gif/composer.h"
 #include "gif/record_window.h"
 #include "pin/pin_manager.h"
+#include "core/app_identity.h"
 #include "core/elevation.h"
 #include "core/game_mode_monitor.h"
 #include "ui/settings_ui/dialog.h"
@@ -53,44 +54,9 @@ namespace {
 QString tr_text(const char *text) { return i18n_tr(text, "MainApp"); }
 }
 
-QIcon create_fallback_app_icon() {
-    QPixmap pixmap(64, 64);
-    pixmap.fill(Qt::transparent);
-    QPainter painter(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(QBrush(QColor("#40E0D0")));
-    painter.drawRoundedRect(4, 4, 56, 56, 12, 12);
-    QFont font;
-    font.setPixelSize(38);
-    font.setBold(true);
-    painter.setFont(font);
-    painter.setPen(QColor("#10322E"));
-    painter.drawText(pixmap.rect(), Qt::AlignCenter, "J");
-    painter.end();
-    return QIcon(pixmap);
-}
+QIcon create_fallback_app_icon() { return fallback_app_icon(); }
 
-QIcon create_app_icon() {
-    const auto icon_path = ResourceManager::get_resource_path(QString::fromUtf8("svg/托盘.svg"));
-    if (QFile::exists(icon_path)) {
-        // Rendered before checking: a damaged SVG gives an empty pixmap, a fully
-        // transparent tray icon as unusable as a missing one.
-        const auto icon_pixmap = QIcon(icon_path).pixmap(64, 64);
-        if (!icon_pixmap.isNull()) {
-            QPixmap pixmap(64, 64);
-            pixmap.fill(Qt::transparent);
-            QPainter painter(&pixmap);
-            painter.setRenderHint(QPainter::Antialiasing);
-            painter.setRenderHint(QPainter::SmoothPixmapTransform);
-            painter.drawPixmap(0, 0, icon_pixmap);
-            painter.end();
-            return QIcon(pixmap);
-        }
-    }
-    log_warning(T("托盘图标资源不可用，改用占位图标: {icon_path}", {{"icon_path", icon_path}}), "Tray");
-    return create_fallback_app_icon();
-}
+QIcon create_app_icon() { return app_icon(); }
 
 MainApp::MainApp(int &argc, char **argv) : app(std::make_unique<QApplication>(argc, argv)) {
     app->setQuitOnLastWindowClosed(false);
@@ -258,7 +224,7 @@ void MainApp::setup_pin_tray_updates() {
 
 void MainApp::update_tray_menu() {
     if (!tray_icon) return;
-    tray_icon->setToolTip(tr_text("jietuba - Click to screenshot"));
+    tray_icon->setToolTip(tray_tooltip_text());
     auto *old_menu = tray_icon->contextMenu();
     tray_icon->setContextMenu(create_tray_menu(this));
     // QSystemTrayIcon does not own its menu.
@@ -353,7 +319,7 @@ void MainApp::setup_tray() {
     if (!QSystemTrayIcon::isSystemTrayAvailable()) show_error_dialog(nullptr, tr_text("Error"), tr_text("System tray not available"));
     tray_icon = new QSystemTrayIcon(this);
     tray_icon->setIcon(create_app_icon());
-    tray_icon->setToolTip(tr_text("jietuba - Click to screenshot"));
+    tray_icon->setToolTip(tray_tooltip_text());
     tray_icon->setContextMenu(create_tray_menu(this));
     connect(tray_icon, &QSystemTrayIcon::activated, this, &MainApp::on_tray_activated);
     tray_icon->show();
@@ -494,6 +460,17 @@ void MainApp::on_settings_accepted(SettingsDialog *accepted_window) {
     // Saves follow every edit, so only what the save touched is redone: re-registering hotkeys or
     // warming the capture engine on each toggle would repeat their work and their warnings.
     const auto &saved = accepted_window->saved_keys();
+    // Branding is applied live: the tray and every window without its own icon follow the
+    // choice at once; windows created later pick it up through create_app_icon().
+    if (saved.contains("custom_app_name") || saved.contains("custom_icon_path")) {
+        const QIcon icon = create_app_icon();
+        app->setWindowIcon(icon);
+        if (tray_icon) {
+            tray_icon->setIcon(icon);
+            tray_icon->setToolTip(tray_tooltip_text());
+        }
+        if (settings_window) settings_window->refresh_branding();
+    }
     if (saved.contains("clipboard_enabled_toggle")) set_clipboard_monitoring_enabled(config_manager->get_clipboard_enabled());
     if (accepted_window->hotkeys_saved()) update_hotkey(true);
     if (saved.contains("capture_engine_combo")) apply_capture_engine(config_manager->get_capture_engine());

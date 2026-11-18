@@ -1,4 +1,5 @@
 #include "translation/translation_dialog.h"
+#include "core/app_identity.h"
 #include "core/i18n.h"
 #include "core/logger.h"
 #include "core/platform_utils.h"
@@ -280,7 +281,7 @@ DashboardTitleBar::DashboardTitleBar(QWidget *parent) : FluentTitleBar(parent) {
     }
 
     app_name = titleLabel;
-    app_name->setText("jietuba");
+    app_name->setText(display_app_name());
     app_name->setObjectName("appName");
 
     pin_button = new DashboardPinButton(this);

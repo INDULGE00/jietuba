@@ -41,8 +41,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x64, arm64]
-    # 只打包和签名，不运行 exe，两种架构都在 x64 机器上做
+        arch: [x64]
+    # 只打包和签名，不运行 exe，在 x64 机器上做
     runs-on: windows-latest
 
     steps:
@@ -129,7 +129,8 @@ jobs:
   # 存在仓库变量里；MSSTORE_PUBLISHER 为空时整个作业跳过，某一版的 MSSTORE_IDENTITY_* 为空时跳过该版。
   msix:
     needs: lite
-    if: vars.MSSTORE_PUBLISHER != ''
+    # x64-only fork release: the MSIX bundle needs both architectures and Store secrets.
+    if: false
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -231,10 +232,11 @@ jobs:
         working-directory: release-assets
         run: sha256sum *.zip > SHA256SUMS.txt
 
-      - name: Generate WinGet manifests from final release packages
-        run: |
-          python3 -m unittest discover -s scripts -p test_generate_winget.py
-          python3 scripts/generate_winget.py --assets release-assets --output build/winget --archive release-assets/winget-manifests.zip
+      # x64-only fork release: WinGet manifests require both architectures, skipped.
+      # - name: Generate WinGet manifests from final release packages
+      #   run: |
+      #     python3 -m unittest discover -s scripts -p test_generate_winget.py
+      #     python3 scripts/generate_winget.py --assets release-assets --output build/winget --archive release-assets/winget-manifests.zip
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
@@ -242,7 +244,6 @@ jobs:
           files: |
             release-assets/jietuba_*.zip
             release-assets/SHA256SUMS.txt
-            release-assets/winget-manifests.zip
           generate_release_notes: true
-          # 先建草稿：发布说明审过、发布包验过之后再公开
-          draft: true
+          # Fork x64-only build: publish directly.
+          draft: false

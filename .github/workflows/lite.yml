@@ -35,7 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x64, arm64]
+        arch: [x64]
         variant: [lite, full]
     runs-on: windows-latest
     steps:
@@ -74,13 +74,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch: [x64, arm64]
+        arch: [x64]
         variant: [lite, full]
         include:
           - arch: x64
             runner: windows-latest
-          - arch: arm64
-            runner: windows-11-arm
     runs-on: ${{ matrix.runner }}
     env:
       PACKAGE: ${{ matrix.variant == 'full' && 'jietuba_pp' || 'jietuba_lite' }}

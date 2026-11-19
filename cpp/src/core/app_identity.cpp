@@ -92,6 +92,7 @@ QString validate_custom_icon(const QString &path) {
     if (!CUSTOM_ICON_SUFFIXES.contains(suffix)) return tr_identity("Unsupported file type. Use an ICO, PNG or SVG file.");
     // SVG is vector: no meaningful pixel size. Only raster formats need a square size in range.
     if (suffix != QStringLiteral("svg")) {
+        const QSize size = decoded_icon_size(path, suffix);
         if (size.isEmpty() || size.width() != size.height()) return tr_identity("The icon must be a square ICO, PNG or SVG image.");
         if (size.width() < CUSTOM_ICON_MIN_SIZE || size.width() > CUSTOM_ICON_MAX_SIZE)
             return tr_identity("The icon must be between 16x16 and 1024x1024 pixels.");

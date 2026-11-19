@@ -27,7 +27,7 @@ QString tray_tooltip_text();
 QString custom_app_name();
 // Empty when custom_icon_path is unset, missing or invalid.
 QString custom_icon_path();
-QIcon custom_icon();
+QIcon custom_icon(int size = 64);
 // Full icon: the custom one when valid, else the bundled tray SVG, else the drawn fallback.
 QIcon app_icon(int size = 64);
 // The drawn placeholder, also used by MainApp's compatibility wrapper.

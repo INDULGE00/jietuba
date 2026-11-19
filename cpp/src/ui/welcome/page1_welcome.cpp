@@ -1,3 +1,4 @@
+#include "core/app_identity.h"
 #include "core/i18n.h"
 #include "core/logger.h"
 #include "core/resource_manager.h"
@@ -174,8 +175,9 @@ protected:
         fireworks->lower();
         auto *icon = new QLabel(this);
         icon->setAlignment(Qt::AlignCenter);
-        const QIcon logo(ResourceManager::get_resource_path(QString::fromUtf8("svg/托盘.svg")));
-        if (!logo.isNull()) icon->setPixmap(logo.pixmap(dialog_scaled(96), dialog_scaled(96)));
+        const int logo_size = dialog_scaled(96);
+        const QPixmap logo = app_icon().pixmap(logo_size, logo_size);
+        if (!logo.isNull()) icon->setPixmap(logo);
         auto *name = new QLabel(PRODUCT_NAME, this);
         name->setAlignment(Qt::AlignCenter);
         set_welcome_label_style(name, "primary", 30, 700);

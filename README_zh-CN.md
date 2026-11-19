@@ -125,6 +125,14 @@
 
 选中的图标会被复制到应用数据目录，原文件可随时删除。点击「重置」恢复默认图标与名称。
 
+此处设置会立即作用于托盘图标、所有窗口标题栏/任务栏图标与对话框图标。资源管理器中 exe 文件本身的图标在编译期嵌入，需构建时指定：
+
+```
+cmake -S cpp -B build -DJIETUBA_APP_ICON="D:/path/to/custom.ico"
+```
+
+`JIETUBA_APP_ICON` 只接受 `.ico`（Windows 资源编译器限制）；PNG/SVG 请先转为 ICO。
+
 ## 代码签名政策
 
 Windows 发布包中的 `jietuba_pp.exe` 和 `jietuba_lite.exe` 均由 GitHub Actions 从本仓库 [cpp/](cpp/) 的 C++ 源码构建。发布流程支持通过 SignPath 进行代码签名；是否签名取决于该次构建配置，请以具体发布包的 EXE 数字签名和发布说明为准。

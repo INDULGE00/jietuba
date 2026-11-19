@@ -1,4 +1,5 @@
 #include "ui/dialogs.h"
+#include "core/app_identity.h"
 #include "core/i18n.h"
 #include "core/resource_manager.h"
 #include "core/ui_theme.h"
@@ -70,7 +71,7 @@ StandardDialog::StandardDialog(QWidget *parent, const QString &title, const QStr
     // A dialog bound to its parent's modality, never globally on top.
     setWindowFlags(Qt::Dialog | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
     setWindowModality(Qt::WindowModal);
-    if (windowIcon().isNull()) setWindowIcon(ResourceManager::get_icon_by_name(QString::fromUtf8("托盘.svg")));
+    if (windowIcon().isNull()) setWindowIcon(app_icon());
     setStyleSheet(R"(
             QDialog#standardDialog {
                 background: #FFFFFF;

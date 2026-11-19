@@ -1,3 +1,4 @@
+#include "core/app_identity.h"
 #include "core/constants.h"
 #include "core/crash_handler.h"
 #include "core/elevation.h"
@@ -45,7 +46,7 @@ public:
     // The flyout is four across; the program's icon is the sixth.
     static constexpr int COLUMNS = 4, FLYOUT_ICONS = 12, OURS = 5;
 
-    explicit TrayDemo(QWidget *parent = nullptr) : LoopingDemo(DURATION_MS, parent), logo_(ResourceManager::get_resource_path(QString::fromUtf8("svg/托盘.svg"))) {
+    explicit TrayDemo(QWidget *parent = nullptr) : LoopingDemo(DURATION_MS, parent), logo_(app_icon(64)) {
         setMinimumHeight(dialog_scaled(220));
     }
 protected:

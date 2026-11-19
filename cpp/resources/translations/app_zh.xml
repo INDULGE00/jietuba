@@ -7598,4 +7598,79 @@ Replace it?</source>
         <translation>请去掉扩展名，保存时会自动添加。</translation>
     </message>
 </context>
+
+<context>
+    <name>AppIdentity</name>
+    <message>
+        <source>The file does not exist.</source>
+        <translation>文件不存在。</translation>
+    </message>
+    <message>
+        <source>The icon file is larger than 4 MB.</source>
+        <translation>图标文件超过 4 MB。</translation>
+    </message>
+    <message>
+        <source>Unsupported file type. Use an ICO, PNG or SVG file.</source>
+        <translation>不支持的文件类型，请使用 ICO、PNG 或 SVG 文件。</translation>
+    </message>
+    <message>
+        <source>The icon must be a square ICO, PNG or SVG image.</source>
+        <translation>图标必须是正方形的 ICO、PNG 或 SVG 图片。</translation>
+    </message>
+    <message>
+        <source>The icon must be between 16x16 and 1024x1024 pixels.</source>
+        <translation>图标尺寸须在 16×16 到 1024×1024 像素之间。</translation>
+    </message>
+    <message>
+        <source>The icon file could not be read.</source>
+        <translation>无法读取图标文件。</translation>
+    </message>
+    <message>
+        <source>The data folder could not be created.</source>
+        <translation>无法创建数据文件夹。</translation>
+    </message>
+    <message>
+        <source>The icon file could not be copied to the data folder.</source>
+        <translation>无法将图标文件复制到数据文件夹。</translation>
+    </message>
+    <message>
+        <source>The copied icon file is damaged.</source>
+        <translation>复制后的图标文件已损坏。</translation>
+    </message>
+    <message>
+        <source>ICO / PNG / SVG; PNG/ICO must be square 16x16-1024x1024 px; up to 4 MB. Recommended: 64x64 or 256x256 PNG.</source>
+        <translation>支持 ICO / PNG / SVG，PNG/ICO 须为正方形 16×16–1024×1024 像素，最大 4 MB。推荐 64×64 或 256×256 的 PNG。</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsDialog</name>
+    <message>
+        <source>Customization</source>
+        <translation>个性化</translation>
+    </message>
+    <message>
+        <source>Application Name</source>
+        <translation>软件名称</translation>
+    </message>
+    <message>
+        <source>Shown in the tray, title bars and settings.</source>
+        <translation>显示在托盘、标题栏和设置窗口中。</translation>
+    </message>
+    <message>
+        <source>Application Icon</source>
+        <translation>软件图标</translation>
+    </message>
+    <message>
+        <source>Choose Icon...</source>
+        <translation>选择图标...</translation>
+    </message>
+    <message>
+        <source>Choose Custom Icon</source>
+        <translation>选择自定义图标</translation>
+    </message>
+    <message>
+        <source>Invalid Icon</source>
+        <translation>图标无效</translation>
+    </message>
+</context>
 </TS>

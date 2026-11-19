@@ -178,8 +178,19 @@ else()
     set(JIETUBA_EXE_NAME jietuba_cpp CACHE INTERNAL "")
 endif()
 # The exe icon and the version resource; SignPath checks the product name and version.
-# The icon is the repository's app.ico, copied next to the generated rc and qrc that embed it.
-configure_file(${JIETUBA_REPO_ROOT}/app.ico ${CMAKE_BINARY_DIR}/generated/app.ico COPYONLY)
+# JIETUBA_APP_ICON overrides the icon embedded in the exe (Explorer / taskbar / title bar).
+# Windows resource files only accept ICO here. Convert PNG/SVG to .ico first (e.g. an online
+# converter or ImageMagick) and pass the .ico path. Runtime-customisable icons (tray, windows,
+# dialogs) are separate and accept ICO/PNG/SVG from the settings UI.
+set(JIETUBA_APP_ICON "${JIETUBA_REPO_ROOT}/app.ico" CACHE FILEPATH "Application .ico embedded in the exe")
+if(NOT EXISTS "${JIETUBA_APP_ICON}")
+    message(FATAL_ERROR "JIETUBA_APP_ICON does not exist: ${JIETUBA_APP_ICON}")
+endif()
+get_filename_component(JIETUBA_APP_ICON_EXT "${JIETUBA_APP_ICON}" LAST_EXT)
+if(NOT JIETUBA_APP_ICON_EXT STREQUAL ".ico")
+    message(FATAL_ERROR "JIETUBA_APP_ICON must be an .ico file (got ${JIETUBA_APP_ICON_EXT})")
+endif()
+configure_file(${JIETUBA_APP_ICON} ${CMAKE_BINARY_DIR}/generated/app.ico COPYONLY)
 set(JIETUBA_ICON_PATH ${CMAKE_BINARY_DIR}/generated/app.ico)
 set(JIETUBA_ICON_QRC ${CMAKE_BINARY_DIR}/generated/app_icon.qrc)
 file(CONFIGURE OUTPUT ${JIETUBA_ICON_QRC} CONTENT "<RCC><qresource prefix=\"/\"><file alias=\"app.ico\">app.ico</file></qresource></RCC>\n")

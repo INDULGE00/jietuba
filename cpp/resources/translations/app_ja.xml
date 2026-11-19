@@ -7608,4 +7608,79 @@ Replace it?</source>
         <translation>拡張子は自動で付くため、入力しないでください。</translation>
     </message>
 </context>
+
+<context>
+    <name>AppIdentity</name>
+    <message>
+        <source>The file does not exist.</source>
+        <translation>The file does not exist.</translation>
+    </message>
+    <message>
+        <source>The icon file is larger than 4 MB.</source>
+        <translation>The icon file is larger than 4 MB.</translation>
+    </message>
+    <message>
+        <source>Unsupported file type. Use an ICO, PNG or SVG file.</source>
+        <translation>Unsupported file type. Use an ICO, PNG or SVG file.</translation>
+    </message>
+    <message>
+        <source>The icon must be a square ICO, PNG or SVG image.</source>
+        <translation>The icon must be a square ICO, PNG or SVG image.</translation>
+    </message>
+    <message>
+        <source>The icon must be between 16x16 and 1024x1024 pixels.</source>
+        <translation>The icon must be between 16x16 and 1024x1024 pixels.</translation>
+    </message>
+    <message>
+        <source>The icon file could not be read.</source>
+        <translation>The icon file could not be read.</translation>
+    </message>
+    <message>
+        <source>The data folder could not be created.</source>
+        <translation>The data folder could not be created.</translation>
+    </message>
+    <message>
+        <source>The icon file could not be copied to the data folder.</source>
+        <translation>The icon file could not be copied to the data folder.</translation>
+    </message>
+    <message>
+        <source>The copied icon file is damaged.</source>
+        <translation>The copied icon file is damaged.</translation>
+    </message>
+    <message>
+        <source>ICO / PNG / SVG; PNG/ICO must be square 16x16-1024x1024 px; up to 4 MB. Recommended: 64x64 or 256x256 PNG.</source>
+        <translation>ICO / PNG / SVG; PNG/ICO must be square 16x16-1024x1024 px; up to 4 MB. Recommended: 64x64 or 256x256 PNG.</translation>
+    </message>
+</context>
+<context>
+    <name>SettingsDialog</name>
+    <message>
+        <source>Customization</source>
+        <translation>Customization</translation>
+    </message>
+    <message>
+        <source>Application Name</source>
+        <translation>Application Name</translation>
+    </message>
+    <message>
+        <source>Shown in the tray, title bars and settings.</source>
+        <translation>Shown in the tray, title bars and settings.</translation>
+    </message>
+    <message>
+        <source>Application Icon</source>
+        <translation>Application Icon</translation>
+    </message>
+    <message>
+        <source>Choose Icon...</source>
+        <translation>Choose Icon...</translation>
+    </message>
+    <message>
+        <source>Choose Custom Icon</source>
+        <translation>Choose Custom Icon</translation>
+    </message>
+    <message>
+        <source>Invalid Icon</source>
+        <translation>Invalid Icon</translation>
+    </message>
+</context>
 </TS>
